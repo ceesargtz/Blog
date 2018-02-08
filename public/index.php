@@ -1,9 +1,11 @@
 <?php
+//front controller
 ini_set('display_errors',1);
 ini_set('display_startup_errors',1);
 error_reporting(E_ALL);
 
 require_once '../vendor/autoload.php';
+session_start();
 
 $baseDir = str_replace(basename($_SERVER['SCRIPT_NAME']),'',$_SERVER['SCRIPT_NAME']);
 $baseUrl ='http://'.$_SERVER['HTTP_HOST'].$baseDir;
@@ -32,9 +34,23 @@ $capsule->bootEloquent();
 use Phroute\Phroute\RouteCollector;
 
 $router = new RouteCollector();
+
+$router->filter('auth',function(){
+  if(!isset($_SESSION['userId'])){
+    header('location: '.BASE_URL.'auth/login');
+    return false;
+  }
+
+});
+$router->controller('/auth',App\controllers\AuthController::class);
+
+$router->group(['before'=> 'auth'],function($router){
+  $router->controller('/admin',App\controllers\admin\IndexController::class);
+  $router->controller('/admin/posts',App\controllers\admin\PostController::class);
+  $router->controller('/admin/users',App\controllers\admin\UserController::class);
+});
 $router->controller('/',App\controllers\IndexController::class);
-$router->controller('/admin',App\controllers\admin\IndexController::class);
-$router->controller('/admin/posts',App\controllers\admin\PostController::class);
+
 
 
 $dispatcher = new Phroute\Phroute\Dispatcher($router->getData());

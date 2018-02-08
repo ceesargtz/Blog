@@ -2,6 +2,7 @@
 namespace App\controllers\admin;
 use App\controllers\BaseController;
 use App\models\BlogPosts;
+use Sirius\Validation\Validator;
 class PostController extends BaseController{
   public function getIndex(){
     //admin/posts or admin/posts/index
@@ -18,12 +19,25 @@ class PostController extends BaseController{
       return $this->render('admin/insert-post.twig');
   }
   public function postCreate(){
-    $blogPost = new BlogPosts([
-      'title'=>$_POST['title'],
-      'content'=>$_POST['content']
-    ]);
-    $result=true;
-    $blogPost -> save();
+    $errors=[];
+    $result=false;
+    $validator = new Validator();
+    $validator ->add('title','required');
+    $validator->add('content','required');
+    if ($validator->validate($_POST)) {
+      $blogPost = new BlogPosts([
+        'title'=>$_POST['title'],
+        'content'=>$_POST['content'],
+      ]);
+      if($_POST['img']){
+        $blogPost->img_url = $_POST['img'];
+      }
+      $result=true;
+      $blogPost -> save();
+    } else{
+      $errors = $validator->getMessages();
+    }
+
 
     // global $pdo;
     //   //admin/posts/create
@@ -33,7 +47,8 @@ class PostController extends BaseController{
     //     'title'=>$_POST['title'],
     //     'content'=>$_POST['content']
     //   ]);
-    return $this->render('admin/insert-post.twig',['result'=>$result]);
+    return $this->render('admin/insert-post.twig',['result'=>$result,
+  'errors'=>$errors]);
   }
 }
  ?>
