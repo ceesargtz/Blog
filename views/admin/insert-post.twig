@@ -1,0 +1,19 @@
+{% extends "layout.twig"%}
+{% block content %}
+<h2>New Post</h2>
+<p>
+<a class="btn btn-primary" href="{{'admin/posts'|url}}">Back</a>
+</p>
+ {%if result %}
+ <div class="alert alert-success">Post Saved</div>
+  {%endif%}
+<form class=""  method="post">
+  <div class="form-group">
+    <label for="inputTitle">Title</label>
+    <input type="text" class="form-control"name="title" idea="inputTitle">
+  </div>
+  <textarea name="content" id="inputContent" rows="5" class="form-control"></textarea>
+  <br>
+  <input type="submit" class="btn btn-primary" value="Save">
+</form>
+{%endblock%}
